@@ -72,6 +72,29 @@ def load():
     connection.commit()
 
 
+def convert_str_to_time(text):
+    return datetime.datetime.strptime(text, datetime_mask)
+
+
+def time_delta(end_time, start_time):
+    return convert_str_to_time(end_time) - convert_str_to_time(start_time)
+
+
+def latest_load_date():
+    query = f'SELECT MAX(LOAD_DATE), USD FROM RATES'
+    for rates in cursor.execute(query):
+        return rates[0]
+
+
+def check_delta():
+    start_time = latest_load_date()
+    end_time = get_datetime(datetime_mask)
+    if time_delta(end_time, start_time) >= datetime.timedelta(minutes=10):
+        return True
+    elif time_delta(end_time, start_time) < datetime.timedelta(minutes=10):
+        return False
+
+
 def data_moving():
     if checking():
         load()
