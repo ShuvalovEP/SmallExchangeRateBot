@@ -107,5 +107,3 @@ def get_latest_rates():
         return get_rates()
     elif time_delta(end_time, start_time) < datetime.timedelta(minutes=10):
         return get_rates()
-
-
