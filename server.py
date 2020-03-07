@@ -10,7 +10,7 @@ environment = path.join(os.getcwd(), 'environment', 'config.ini')
 config = configparser.ConfigParser()
 config.read(environment)
 
-chat_id = '151479970'
+chat_id = config['TelegramBot']['chat_id']
 TOKEN = config['TelegramBot']['token']
 PROXY = {'https': f"socks5h://{config['Proxy']['user']}:{config['Proxy']['password']}@{config['Proxy']['url']}:1080"}
 URL = f'https://api.telegram.org/bot{TOKEN}/'
