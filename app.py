@@ -86,15 +86,28 @@ def latest_load_date():
         return rates[0]
 
 
-def check_delta():
+def get_rates():
+    currency_name_list = []
+    currency_rates = {}
+
+    for rates in cursor.execute('PRAGMA table_info(RATES);'):
+        currency_name_list.append(rates[1])
+
+    for currency_name in currency_name_list:
+        currency_value = cursor.execute(f'SELECT MAX(LOAD_DATE), {currency_name} FROM RATES')
+        for value in currency_value:
+            currency_rates[currency_name] = value[1]
+
+    return currency_rates
+
+
+def get_latest_rates():
     start_time = latest_load_date()
     end_time = get_datetime(datetime_mask)
-    if time_delta(end_time, start_time) >= datetime.timedelta(minutes=10):
-        return True
-    elif time_delta(end_time, start_time) < datetime.timedelta(minutes=10):
-        return False
-
-
-def data_moving():
-    if checking():
+    if time_delta(end_time, start_time) >= datetime.timedelta(minutes=10) and checking():
         load()
+        return get_rates()
+    elif time_delta(end_time, start_time) < datetime.timedelta(minutes=10):
+        return get_rates()
+
+
