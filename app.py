@@ -67,7 +67,7 @@ def load():
     for value in currency_value_list:
         currency_value.append(value)
 
-    query = f'INSERT INTO RATES VALUES ({", ".join("?" * (len(currency_value_list) + 1))})'
+    query = f'INSERT INTO RATES VALUES ({", ".join("?" * (len(currency_value_list) + 1))});'
     cursor.execute(query, currency_value)
     connection.commit()
 
@@ -80,8 +80,8 @@ def time_delta(end_time, start_time):
     return convert_str_to_time(end_time) - convert_str_to_time(start_time)
 
 
-def latest_load_date():
-    query = f'SELECT MAX(LOAD_DATE), USD FROM RATES'
+def get_load_date():
+    query = f'SELECT MAX(LOAD_DATE), USD FROM RATES;'
     for rates in cursor.execute(query):
         return rates[0]
 
@@ -89,21 +89,29 @@ def latest_load_date():
 def get_rates():
     currency_name_list = []
     currency_rates = {}
+
     for rates in cursor.execute('PRAGMA table_info(RATES);'):
         currency_name_list.append(rates[1])
 
     for currency_name in currency_name_list:
-        currency_value = cursor.execute(f'SELECT MAX(LOAD_DATE), {currency_name} FROM RATES')
+        currency_value = cursor.execute(f'SELECT MAX(LOAD_DATE), {currency_name} FROM RATES;')
         for value in currency_value:
             currency_rates[currency_name] = value[1]
     return currency_rates
 
 
 def get_latest_rates():
-    start_time = latest_load_date()
+    start_time = get_load_date()
     end_time = get_datetime(datetime_mask)
     if time_delta(end_time, start_time) >= datetime.timedelta(minutes=10) and checking():
         load()
         return get_rates()
     elif time_delta(end_time, start_time) < datetime.timedelta(minutes=10):
         return get_rates()
+
+
+def get_all_rates():
+    rates_str = ''
+    for rates in get_latest_rates().items():
+        rates_str += f'\n {rates[0]}: {rates[1]}'
+    return rates_str
