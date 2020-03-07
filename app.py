@@ -89,7 +89,6 @@ def latest_load_date():
 def get_rates():
     currency_name_list = []
     currency_rates = {}
-
     for rates in cursor.execute('PRAGMA table_info(RATES);'):
         currency_name_list.append(rates[1])
 
@@ -97,7 +96,6 @@ def get_rates():
         currency_value = cursor.execute(f'SELECT MAX(LOAD_DATE), {currency_name} FROM RATES')
         for value in currency_value:
             currency_rates[currency_name] = value[1]
-
     return currency_rates
 
 
